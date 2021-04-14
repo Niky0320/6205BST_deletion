@@ -262,20 +262,7 @@ public class BSTSimple<Key extends Comparable<Key>, Value> implements BstDetail<
         return 1 + Math.max(depthL, depthS);
     }
     
-    public int depthSum() {
-        return depthSum(root,0);
-    }
     
-    
-    private int depthSum(Node node,int sum) {
-    	if (node == null) return 0;
-    	
-        int depthS = depthSum(node.smaller,sum);
-        int depthL = depthSum(node.larger,sum);
-        
-        return depth(node)+depthL+depthS;
-        		
-    }
 
     private class NodeValue {
         private final Node node;
@@ -376,67 +363,81 @@ public class BSTSimple<Key extends Comparable<Key>, Value> implements BstDetail<
  //delete Hibbard
     	System.out.println("Delete use Hibbard:"); 
     	
+ //512I+256D，1024I+512D	each trail conduct 50 times, calculate average of max depth
+    	for(int it=512;it<=Math.pow(2,20);it*=2) {
+    		int dt = it/2;
+    		int sumDepth = 0;
+    		int sumN = 0;
+    		
+    		for(int tim=0;tim<50;tim++) {
+    	    
     	    BSTSimple<Integer, Integer> bst = new BSTSimple<>();
-    	    bst.put(500,100); //root ,N=1
-    	        
+    	    bst.put(500,100); //root ,N=1    
     	    int i=0;
     	    int j=0;
-            while(i<1024 || j<512) {
+            while(i<it || j<dt) {
             	int tt = new Random().nextInt(2);//0 OR 1
-            	//(int)Math.random()>0.5?0:1;
-            	int keyy  = new Random().nextInt(1000)+1;
-            	int valuee  = new Random().nextInt(1000)+1;
-            	if(tt==1 && i<1024) {
+            	
+            	int keyy  = new Random().nextInt(it)+1;
+            	int valuee  = new Random().nextInt(it)+1;
+            	if(tt==1 && i<it) {
             		bst.put(keyy,valuee);
             		i++;
-            	}if(tt==0 && j<512) {
+            	}if(tt==0 && j<dt) {
             		bst.delete(keyy);
             		j++;
             	}
-            	//System.out.println("N="+bst.size());
-            	//System.out.println("N="+bst.size()+"--Max depth: "+bst.depth()+"--Mean depth: "+String.format("%.2f", (double)bst.depthSum()/bst.size()));
             }
-            System.out.println("Final:");
-            //System.out.println(bst.toString());
-            System.out.println("N="+bst.size());
-            System.out.println("Max depth: "+bst.depth()+", Mean depth: "+ String.format("%.2f", (double)bst.depthSum()/bst.size()) );
-            
+            sumDepth += bst.depth();
+            sumN += bst.size();
+            //System.out.println( "lgN = "+ String.format("%.2f",Math.log(bst.size())/Math.log(2)));
+    		} 
+    		
+    		System.out.println("N="+String.format("%.2f",(float)sumN/50)+", lgN = "+String.format("%.2f",Math.log(sumN/50)/Math.log(2))+", Mean Max depth: "+ String.format("%.2f",(float)sumDepth/50) );  
+        } 
+    		
+    	    
         System.out.println();
         
         
         
 // delete use Arbitrary Substitution Principal
-        System.out.println("Delete use Arbitrary Substitution Principal:"); 
+        System.out.println("Delete use Random Selection:"); 
         
-        BSTSimple<Integer, Integer> bst1 = new BSTSimple<>();
-	    bst1.put(500,100); //root ,N=1
-	     
-	    int i1=0;
-	    int j1=0;
-        while(i1<1024 || j1<512) {
-        	int tt1 = new Random().nextInt(2);//0 OR 1 
-        	//(int)Math.random()>0.5?0:1;
-        	int keyy1  = new Random().nextInt(1000)+1;
-        	int valuee1  = new Random().nextInt(1000)+1;
-        	//System.out.println("tt:"+tt+", key:"+keyy+" value:"+valuee);
-        	if(tt1==1 && i1<1024) {
-        		bst1.put(keyy1,valuee1);
-        		//System.out.println("insert:("+keyy+","+valuee+")!");
-        		i1++;
-        	}if(tt1==0 && j1<512) {
-        		bst1.deleteRandom(keyy1);
-        		//System.out.println("delete:("+keyy+")!");
-        		j1++;
-        	}
+        for(int it1=512;it1<=Math.pow(2,20);it1*=2) {
         	
-        	System.out.println("N="+bst1.size()+"--Max depth: "+bst1.depth()+"--Mean depth: "+ String.format("%.2f", (double)bst1.depthSum()/bst1.size()));
+        	int dt1 = it1/2;	
+        	int sumDepth1 = 0;
+    		int sumN1 = 0;
+    		
+    		for(int tim1=0;tim1<50;tim1++) {
+    			BSTSimple<Integer, Integer> bst1 = new BSTSimple<>();
+	            bst1.put(500,100); //root ,N=1
+	            int i1=0;
+	            int j1=0;
+                while(i1<it1 || j1<dt1) {
+        	       int tt1 = new Random().nextInt(2);//0 OR 1 
+        	//(int)Math.random()>0.5?0:1;
+        	       int keyy1  = new Random().nextInt(it1)+1;
+        	       int valuee1  = new Random().nextInt(it1)+1;
+        	
+        	//System.out.println("tt:"+tt+", key:"+keyy+" value:"+valuee);
+        	       if(tt1==1 && i1<it1) {
+        		      bst1.put(keyy1,valuee1);
+        		//System.out.println("insert:("+keyy+","+valuee+")!");
+        		      i1++;
+        	       }if(tt1==0 && j1<dt1) {
+        		       bst1.deleteRandom(keyy1);
+        		//System.out.println("delete:("+keyy+")!");
+        		       j1++;
+        	       }
+                }
+                sumDepth1 += bst1.depth();
+                sumN1 += bst1.size();
+           }
+           System.out.println("N="+String.format("%.2f",(float)sumN1/50)+", lgN = "+String.format("%.2f",Math.log(sumN1/50)/Math.log(2))+", Mean Max depth: "+ String.format("%.2f",(float)sumDepth1/50) );  
+       
         }
-        
-        System.out.println("Final:");
-        //System.out.println(bst1.toString());
-        System.out.println("N="+bst1.size());
-        System.out.println("Max depth: "+bst1.depth()+", Mean depth: "+ String.format("%.2f", (double)bst1.depthSum()/bst1.size()) );
-        
     }
 
 	
